@@ -89,7 +89,8 @@ def start():
         number_one = font.render("1", False, WHITE)
         screen.blit(number_one, (int(width/2 - 10), int(height/2 + 20)))
 
-    checkScore()
+    if multiplayer == False:
+        checkScore()
 
     if current_time - score_time < 2100:
         ball_speed_y, ball_speed_x = 0, 0
@@ -109,15 +110,23 @@ def player_move():
 
 
 def opponent_move():
-    if opponent.top < ball.y:
-        opponent.y += opponent_speed * random_move_difference()
-    if opponent.bottom > ball.y:
-        opponent.y -= opponent_speed * random_move_difference()
+    if multiplayer:
+        opponent.y += opponent_speed
 
-    if opponent.top <= 0:
-        opponent.top = 0 * 0.8
-    if opponent.bottom >= height:
-        opponent.bottom = height * random_move_difference()
+        if opponent.top <= 0:
+            opponent.top = 0
+        if opponent.bottom >= height:
+            opponent.bottom = height
+    else:
+        if opponent.top < ball.y:
+            opponent.y += opponent_speed * random_move_difference()
+        if opponent.bottom > ball.y:
+            opponent.y -= opponent_speed * random_move_difference()
+
+        if opponent.top <= 0:
+            opponent.top = 0 * 0.8
+        if opponent.bottom >= height:
+            opponent.bottom = height * random_move_difference()
 
 
 def random_move_difference():
@@ -152,12 +161,17 @@ def checkScore():
     elif opponent_score >= 9:
         opponent_score = 0
         player_score = 0
-        level = 0
+        level = 1
+        BALL_SPEED = 7 * BALL_SPEED
+        ball_speed_x = BALL_SPEED * random.choice((1, -1))
+        ball_speed_y = BALL_SPEED * random.choice((1, -1))
         pass
 
-
-if(len(argv) == 3 and argv[2] == "multiplayer"):
+print(argv)
+if(len(argv) == 2 and argv[1] == "multiplayer"):
+    print("Multiplayer active")
     multiplayer = True
+    opponent_speed = 0
     pass
 
 while run:
@@ -174,6 +188,17 @@ while run:
                 player_speed += 6
             if e.key == pygame.K_DOWN:
                 player_speed -= 6
+        if multiplayer:
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_w:
+                    opponent_speed -= 6
+                if e.key == pygame.K_s:
+                    opponent_speed += 6
+            if e.type == pygame.KEYUP:
+                if e.key == pygame.K_w:
+                    opponent_speed += 6
+                if e.key == pygame.K_s:
+                    opponent_speed -= 6
     screen.fill(BG)
 
     ball_move()
@@ -183,7 +208,8 @@ while run:
         start()
 
     render_score()
-    render_level()
+    if multiplayer == False:
+        render_level()
 
     pygame.draw.rect(screen, GREEN, player)
     pygame.draw.rect(screen, GREEN, opponent)
