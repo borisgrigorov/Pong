@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import random
+from sys import argv
 import pygame
+
 pygame.init()
 
 BG = (3, 9, 51)
@@ -26,12 +28,16 @@ score_time = True
 player_score = 0
 opponent_score = 0
 
+multiplayer = False
+
 level = 1
 
 run = True
 
-ball_speed_x = 7 * random.choice((1, -1))
-ball_speed_y = 7 * random.choice((1, -1))
+BALL_SPEED = 7
+
+ball_speed_x = BALL_SPEED * random.choice((1, -1))
+ball_speed_y = BALL_SPEED * random.choice((1, -1))
 
 
 def ball_move():
@@ -83,6 +89,8 @@ def start():
         number_one = font.render("1", False, WHITE)
         screen.blit(number_one, (int(width/2 - 10), int(height/2 + 20)))
 
+    checkScore()
+
     if current_time - score_time < 2100:
         ball_speed_y, ball_speed_x = 0, 0
     else:
@@ -99,28 +107,58 @@ def player_move():
     if player.bottom >= height:
         player.bottom = height
 
-def opponent_move():
-	if opponent.top < ball.y:
-		opponent.y += opponent_speed * random_move_difference()
-	if opponent.bottom > ball.y:
-		opponent.y -= opponent_speed * random_move_difference()
 
-	if opponent.top <= 0:
-		opponent.top = 0 * 0.8
-	if opponent.bottom >= height:
-		opponent.bottom = height * random_move_difference()
+def opponent_move():
+    if opponent.top < ball.y:
+        opponent.y += opponent_speed * random_move_difference()
+    if opponent.bottom > ball.y:
+        opponent.y -= opponent_speed * random_move_difference()
+
+    if opponent.top <= 0:
+        opponent.top = 0 * 0.8
+    if opponent.bottom >= height:
+        opponent.bottom = height * random_move_difference()
+
 
 def random_move_difference():
-    if score_time == True:
-        return 1;
-    return random.randrange(7, 13, 1) / 10;
+    if score_time:
+        return 1
+    return random.randrange(7, 13, 1) / 10
+
 
 def render_score():
-    player_text = font.render(f'{player_score}',False,WHITE)
-    screen.blit(player_text,(660,470))
+    player_text = font.render(f'{player_score}', False, WHITE)
+    screen.blit(player_text, (660, 470))
 
-    opponent_text = font.render(f'{opponent_score}',False,WHITE)
-    screen.blit(opponent_text,(600,470))
+    opponent_text = font.render(f'{opponent_score}', False, WHITE)
+    screen.blit(opponent_text, (600, 470))
+
+
+def render_level():
+    level_text = font.render(f'Level {level}', False, WHITE)
+    screen.blit(level_text, (50, 50))
+
+
+def checkScore():
+    global level, player_score, opponent_score, ball_speed_x, ball_speed_y, BALL_SPEED
+    if player_score >= 9:
+        level += 1
+        opponent_score = 0
+        player_score = 0
+        BALL_SPEED = 1.5 * BALL_SPEED
+        ball_speed_x = BALL_SPEED * random.choice((1, -1))
+        ball_speed_y = BALL_SPEED * random.choice((1, -1))
+        pass
+    elif opponent_score >= 9:
+        opponent_score = 0
+        player_score = 0
+        level = 0
+        pass
+
+
+if(len(argv) == 3 and argv[2] == "multiplayer"):
+    multiplayer = True
+    pass
 
 while run:
     for e in pygame.event.get():
@@ -145,6 +183,7 @@ while run:
         start()
 
     render_score()
+    render_level()
 
     pygame.draw.rect(screen, GREEN, player)
     pygame.draw.rect(screen, GREEN, opponent)
