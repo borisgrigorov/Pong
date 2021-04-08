@@ -30,6 +30,8 @@ opponent_score = 0
 current_time = 0
 tick_time = 60
 
+multiplayer = False
+
 level = 1
 
 multiplayer = False
