@@ -2,7 +2,7 @@
 import random
 from sys import argv
 import pygame
-
+import args
 
 pygame.init()
 
@@ -23,7 +23,10 @@ ball = pygame.Rect(int(width / 2 - 15), int(height / 2 - 15), 30, 30)
 player = pygame.Rect(int(width - 20), int(height / 2 - 70), 10, 140)
 opponent = pygame.Rect(10, int(height / 2 - 70), 10, 140)
 
-debug = True
+debug = args.isDebug()
+
+if args.isDebug():
+    print("Launching in debug mode")
 
 player_score = 0
 opponent_score = 0
