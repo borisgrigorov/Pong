@@ -28,6 +28,10 @@ debug = args.isDebug()
 if args.isDebug():
     print("Launching in debug mode")
 
+if args.isHelpWanted():
+    print("How to use:")
+    # TODO: PRINT START ARGUMENTS
+
 player_score = 0
 opponent_score = 0
 current_time = 0
@@ -224,12 +228,10 @@ def checkScore():
         ball_speed_y = BALL_SPEED * random.choice((1, -1))
         pass
 
-print(argv)
-if(len(argv) == 2 and argv[1] == "multiplayer"):
+if(args.isMultiplayer()):
     print("Multiplayer active")
     multiplayer = True
     opponent_speed = 0
-    pass
 
 while run:
     for e in pygame.event.get():
