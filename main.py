@@ -23,7 +23,7 @@ ball = pygame.Rect(int(width / 2 - 15), int(height / 2 - 15), 30, 30)
 player = pygame.Rect(int(width - 20), int(height / 2 - 70), 10, 140)
 opponent = pygame.Rect(10, int(height / 2 - 70), 10, 140)
 
-debug = False
+debug = True
 
 player_score = 0
 opponent_score = 0
@@ -31,6 +31,8 @@ current_time = 0
 tick_time = 60
 
 level = 1
+
+multiplayer = False
 
 BALL_SPEED = 7
 
@@ -67,9 +69,9 @@ def ball_move():
         elif abs(ball.bottom - player.top) < 10:        # Tak či tak nemám perfektní řešení a netuším jak tento problém vyřešit.
             ball_speed_y *= -1                          # Nejlepší řešení by možná bylo, kdyby ta páčka měla hitbox i za hranicí okna a i kdyby byl gól, tak to zkontroluje jestli je to u hitboxu toho hráče/opponenta
         elif abs(ball.top - player.bottom) < 10:        # Pokud by to bylo v hitboxu toho hráče, tak by to ignorovalo tu kondici kde to přičítá bod a prostě by se to odpálilo.
-            ball_speed_y *= -1                          # A nebo je možné tam dát limit........
-
-    if ball.colliderect(opponent):
+            ball_speed_y *= -1                          # A nebo je možné tam dát limit........ Projevuje se už u levelu 4.
+                                                        # Radikální řešení je "předpovědět" polohu míče a jestli bude končit za kladkou, tak to nepočítat jako gól
+    if ball.colliderect(opponent):          
         if abs(ball.left - opponent.right) < 10:
             ball_speed_x *= -1
         elif abs(ball.bottom - opponent.top) < 10:
@@ -120,7 +122,6 @@ def player_move():
 
 
 def opponent_move():
-<<<<<<< HEAD
     if multiplayer:
         opponent.y += opponent_speed
 
@@ -129,35 +130,22 @@ def opponent_move():
         if opponent.bottom >= height:
             opponent.bottom = height
     else:
-        if opponent.top < ball.y:
-            opponent.y += opponent_speed * random_move_difference()
-        if opponent.bottom > ball.y:
-            opponent.y -= opponent_speed * random_move_difference()
+        if abs(opponent.y - ball.y) >= 5:             # Pokud není rozdíl vzdálenosti na ose y vyšší než 10, destička se vůbec hýbat nebude. Navíc to přidává umělou odezvu co by měl člověk.
+            if can_move == True:
+                if opponent.top < ball.y:
+                    opponent.y += opponent_speed * random_move_difference()
+                if opponent.bottom > ball.y:
+                    opponent.y -= opponent_speed * random_move_difference()
 
         if opponent.top <= 0:
-            opponent.top = 0 * 0.8
+            opponent.top = 0
         if opponent.bottom >= height:
             opponent.bottom = height * random_move_difference()
-=======
-    global opponent_speed
-    if abs(opponent.y - ball.y) >= 15:             # Pokud není rozdíl vzdálenosti na ose y vyšší než 15, destička se vůbec hýbat nebude. Navíc to přidává umělou odezvu co by měl člověk.
-        if can_move == True:
-            if opponent.top < ball.y:
-                opponent.y += opponent_speed * random_move_difference()
-            if opponent.bottom > ball.y:
-                opponent.y -= opponent_speed * random_move_difference()
-
-    if opponent.top <= 0:
-        opponent.top = 0 * 0.8           # Lol na co je toto? Když to oddělám funguje to per
-    if opponent.bottom >= height:
-        opponent.bottom = height * random_move_difference()
->>>>>>> 5444078 (Debug mode, bug fixy, před začátkem se nemůžeš hýbat)
-
 
 def random_move_difference():
     if score_time:
         return 1
-    return random.randrange(7, 13, 1) / 10
+    return random.randrange(8, 12, 1) / 10
 
 
 def render_score():
@@ -218,11 +206,13 @@ def checkScore():
         BALL_SPEED = 7 + (1.2 * level)         
         ball_speed_x = BALL_SPEED * random.choice((1, -1))
         ball_speed_y = BALL_SPEED * random.choice((1, -1))    # Další opravení toho bugu kde se míč nezrychloval
-        opponent_speed = (6 + (level * 1.05))
+        if not multiplayer:
+            opponent_speed = (6 + (level * 1.1))
+        else:
+            opponent_speed = (6 + (level * 1.05))
     elif opponent_score >= 9:
         opponent_score = 0
         player_score = 0
-<<<<<<< HEAD
         level = 1
         BALL_SPEED = 7 * BALL_SPEED
         ball_speed_x = BALL_SPEED * random.choice((1, -1))
@@ -235,11 +225,6 @@ if(len(argv) == 2 and argv[1] == "multiplayer"):
     multiplayer = True
     opponent_speed = 0
     pass
-=======
-        level = 0
-
-
->>>>>>> 5444078 (Debug mode, bug fixy, před začátkem se nemůžeš hýbat)
 
 while run:
     for e in pygame.event.get():
@@ -268,22 +253,19 @@ while run:
             if e.key == pygame.K_UP:
                 player_speed = 0            # Kdyby tady bylo -= tak by při změně rychlosti na vyšší mohlo dojít ke zbytku (efekt padajícího odpalovátka); 0 je nejbezpečnější
             if e.key == pygame.K_DOWN:
-<<<<<<< HEAD
-                player_speed -= 6
+                player_speed = 0
         if multiplayer:
             if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_w:
-                    opponent_speed -= 6
-                if e.key == pygame.K_s:
-                    opponent_speed += 6
+                if can_move == True:
+                    if e.key == pygame.K_w:
+                        opponent_speed -= (6 + (level * 1.05))
+                    if e.key == pygame.K_s:
+                        opponent_speed += (6 + (level * 1.05))
             if e.type == pygame.KEYUP:
                 if e.key == pygame.K_w:
-                    opponent_speed += 6
+                    opponent_speed = 0
                 if e.key == pygame.K_s:
-                    opponent_speed -= 6
-=======
-                player_speed = 0
->>>>>>> 5444078 (Debug mode, bug fixy, před začátkem se nemůžeš hýbat)
+                    opponent_speed = 0
     screen.fill(BG)
 
     ball_move()
@@ -293,13 +275,9 @@ while run:
         start()
 
     render_score()
-<<<<<<< HEAD
     if multiplayer == False:
         render_level()
-=======
-    render_level()
     debug_stats()
->>>>>>> 5444078 (Debug mode, bug fixy, před začátkem se nemůžeš hýbat)
 
     pygame.draw.rect(screen, GREEN, player)
     pygame.draw.rect(screen, GREEN, opponent)
