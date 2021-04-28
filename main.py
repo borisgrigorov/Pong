@@ -167,14 +167,15 @@ def ball_move():
         if ball.right >= width:
             score_time = pygame.time.get_ticks()
             opponent_score += 1
-        sio.emit("gamedata", {
-            "pos": player.y,
-            "name": onlineData["myName"],
-            "game": onlineData["game"],
-            "ball_x": ball.x,
-            "ball_y": ball.y,
-            "score_time": score_time,
-        });
+        if online:
+            sio.emit("gamedata", {
+                "pos": player.y,
+                "name": onlineData["myName"],
+                "game": onlineData["game"],
+                "ball_x": ball.x,
+                "ball_y": ball.y,
+                "score_time": score_time,
+            })
     if ball.colliderect(player):
         if abs(ball.right - player.left) < 10:
             ball_speed_x *= -1
