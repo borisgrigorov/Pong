@@ -351,7 +351,7 @@ def checkScore():
         opponent_score = 0
         player_score = 0
         level = 1
-        BALL_SPEED = 7 * BALL_SPEED
+        BALL_SPEED = 7
         ball_speed_x = BALL_SPEED * random.choice((1, -1))
         ball_speed_y = BALL_SPEED * random.choice((1, -1))
         pass
@@ -427,7 +427,8 @@ while run:
         render_score()
         if multiplayer == False:
             render_level()
-    renderServerInfo()
+    if online:
+        renderServerInfo()
     debug_stats()
 
     pygame.draw.rect(screen, GREEN, player)
